@@ -67,6 +67,14 @@ one. Enable **Bluetooth → Settings → Swap page-turn buttons when screen is i
 next/previous page buttons while the screen is rotated 180°. Combined with a button bound to "Invert
 rotation", the upper button then always turns the page the same way. The setting is off by default.
 
+### Faster auto-connect
+
+With auto-connect enabled, the plugin now contacts paired devices directly right after Bluetooth
+comes on and opens a remote's input as soon as it appears, instead of waiting for a discovery scan
+and for the Bluetooth service to report the connection. On the test setup this brought the time from
+waking the reader to a working remote down from roughly 30 seconds to between 6 and 14 seconds. See
+[auto-connect](docs/settings/bluetooth-settings/auto-connect.md).
+
 ### Tested device
 
 Only one remote has been tested, on a Kobo Clara BW:
