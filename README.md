@@ -75,6 +75,12 @@ and for the Bluetooth service to report the connection. On the test setup this b
 waking the reader to a working remote down from roughly 30 seconds to between 6 and 14 seconds. See
 [auto-connect](docs/settings/bluetooth-settings/auto-connect.md).
 
+### Enable Bluetooth on startup
+
+Auto-resume only covers waking from sleep; after a reboot Bluetooth stayed off until enabled by hand.
+The new setting **Bluetooth → Settings → Enable on startup** turns it on once when KOReader starts.
+Off by default.
+
 ### Tested device
 
 Only one remote has been tested, on a Kobo Clara BW:
