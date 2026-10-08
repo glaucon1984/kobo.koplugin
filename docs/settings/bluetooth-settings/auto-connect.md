@@ -86,6 +86,13 @@ does the following while auto-connect is active:
 No direct attempts are made after a device disconnects, because contacting a device that was just
 switched off only keeps the Bluetooth service busy. From then on the scan and the once-a-second
 check apply.
+### After standby
+
+Only a device that was still connected when the reader went to standby gets a direct attempt after
+the wake-up: such a device usually stayed on and reconnects within seconds. If no device was
+connected at that point (for example because it was switched off first), the scan starts right away
+instead, since a blind attempt would only occupy the radio for 15 seconds.
+
 ### Several paired devices
 
 The Bluetooth service connects to one device at a time, and an attempt to reach a device that is
@@ -95,4 +102,5 @@ seconds when it stayed on), so the discovery scan gets the radio and finds the d
 switched on. A blind attempt tends to time out against a remote that was just switched on, whereas a
 connection right after the scan has seen it succeeds. A manual "Connect" from the paired devices list waits for a pending attempt to finish
 instead of failing with "in progress". Two devices of the same model (same name) are told apart by
-address; a device that is already in use is never matched to the other one's input node.
+address: their input nodes carry the address, so each device is opened on its own node even though
+the names are identical.
