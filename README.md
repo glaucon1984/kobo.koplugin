@@ -59,6 +59,15 @@ Buttons can only be told apart by the direction of their gesture. Two buttons th
 direction, or tap at different positions, register as the same key. Remotes that emulate a mouse
 (relative movement) instead of a touch screen are not covered.
 
+### The setup this fork was written for
+
+The remote sits in a 3D-printed case with thumb buttons for the Kobo Clara BW / Colour, so pages
+turn without touching the screen. The case and the instructions for fitting a cheap ring remote into
+it are on MakerWorld: [Kobo Clara BW / Colour turn-page buttons
+case](https://makerworld.com/en/models/3400159-kobo-clara-bw-color-turn-page-buttons-case). Turning
+the reader around to hold it in the other hand also flips the remote, which is why the next setting
+exists.
+
 ### Swapping page-turn buttons when the screen is inverted
 
 For a remote that is attached to the reader (for example built into a case), turning the reader
