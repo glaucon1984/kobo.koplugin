@@ -5,10 +5,29 @@
 --- Handles D-Bus command execution and communication with the MTK Bluetooth stack.
 
 local Subprocess = require("src/lib/bluetooth/subprocess")
+local WmtPower = require("src/lib/bluetooth/wmt_power")
 local ffiutil = require("ffi/util")
 local logger = require("logger")
 
 local MtkAdapter = {}
+
+---
+--- Whether the radio driver is loaded, so the Bluetooth daemon may be talked to.
+--- Any D-Bus call to com.kobo.mtk.bluedroid makes D-Bus start the daemon; on a
+--- boot where nothing has loaded the driver yet, that leaves a daemon with no
+--- driver under it, and the chip's first power-on then panics the kernel
+--- (observed on a Clara BW). So every D-Bus command checks this first and does
+--- nothing while the stack is missing; MTKBluetooth:turnBluetoothOn() loads it.
+--- @return boolean
+function MtkAdapter.isStackLoaded()
+    if WmtPower.isStackLoaded() then
+        return true
+    end
+
+    logger.dbg("MtkAdapter: radio driver not loaded, not contacting the Bluetooth daemon")
+
+    return false
+end
 
 ---
 --- D-Bus commands for turning Bluetooth on.
@@ -57,6 +76,10 @@ MtkAdapter.COMMAND_GET_MANAGED_OBJECTS = "dbus-send --system --print-reply --des
 --- @param commands table Array of command strings to execute.
 --- @return boolean True if all commands succeeded, false otherwise.
 function MtkAdapter.executeCommands(commands)
+    if not MtkAdapter.isStackLoaded() then
+        return false
+    end
+
     for i, cmd in ipairs(commands) do
         logger.dbg("MtkAdapter: Executing command", i, ":", cmd)
 
@@ -78,6 +101,10 @@ end
 --- Checks if Bluetooth is currently enabled.
 --- @return boolean True if Bluetooth is powered on, false otherwise.
 function MtkAdapter.isEnabled()
+    if not MtkAdapter.isStackLoaded() then
+        return false
+    end
+
     local handle = io.popen(MtkAdapter.COMMAND_CHECK_STATUS)
 
     if not handle then
@@ -117,6 +144,10 @@ end
 --- Starts Bluetooth device discovery.
 --- @return boolean True if successful, false otherwise.
 function MtkAdapter.startDiscovery()
+    if not MtkAdapter.isStackLoaded() then
+        return false
+    end
+
     logger.info("MtkAdapter: Starting device discovery")
 
     local result = os.execute(MtkAdapter.COMMAND_START_DISCOVERY)
@@ -128,6 +159,10 @@ end
 --- Stops Bluetooth device discovery.
 --- @return boolean True if successful, false otherwise.
 function MtkAdapter.stopDiscovery()
+    if not MtkAdapter.isStackLoaded() then
+        return false
+    end
+
     logger.dbg("MtkAdapter: Stopping device discovery")
 
     local result = os.execute(MtkAdapter.COMMAND_STOP_DISCOVERY)
@@ -139,6 +174,10 @@ end
 --- Gets all managed Bluetooth objects (devices) via D-Bus.
 --- @return string|nil Raw D-Bus output or nil on failure.
 function MtkAdapter.getManagedObjects()
+    if not MtkAdapter.isStackLoaded() then
+        return nil
+    end
+
     local handle = io.popen(MtkAdapter.COMMAND_GET_MANAGED_OBJECTS)
 
     if not handle then
@@ -158,6 +197,10 @@ end
 --- @param device_path string D-Bus object path of the device
 --- @return boolean True if connection succeeded, false otherwise.
 function MtkAdapter.connectDevice(device_path)
+    if not MtkAdapter.isStackLoaded() then
+        return false
+    end
+
     logger.info("MtkAdapter: Connecting to device:", device_path)
 
     local cmd = string.format(
@@ -175,6 +218,10 @@ end
 --- @param device_path string D-Bus object path of the device
 --- @return boolean True if disconnection succeeded, false otherwise.
 function MtkAdapter.disconnectDevice(device_path)
+    if not MtkAdapter.isStackLoaded() then
+        return false
+    end
+
     logger.info("MtkAdapter: Disconnecting from device:", device_path)
 
     local cmd = string.format(
@@ -192,6 +239,10 @@ end
 --- @param device_path string D-Bus object path of the device
 --- @return boolean True if removal succeeded, false otherwise.
 function MtkAdapter.removeDevice(device_path)
+    if not MtkAdapter.isStackLoaded() then
+        return false
+    end
+
     logger.info("MtkAdapter: Removing device:", device_path)
 
     local disconnected = MtkAdapter.disconnectDevice(device_path)
@@ -215,6 +266,10 @@ end
 --- @param trusted boolean True to trust the device, false to untrust
 --- @return boolean True if the operation succeeded, false otherwise.
 function MtkAdapter.setDeviceTrusted(device_path, trusted)
+    if not MtkAdapter.isStackLoaded() then
+        return false
+    end
+
     local trust_str = trusted and "true" or "false"
     logger.info("MtkAdapter: Setting device trusted:", device_path, "to", trust_str)
 
